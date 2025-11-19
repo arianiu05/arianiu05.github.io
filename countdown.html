@@ -1,0 +1,347 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>元旦倒计时</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 愿望墙容器 */
+        .wish-wall {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* 让鼠标事件穿透，不影响下面的点击 */
+            z-index: 1;
+        }
+
+        /* 愿望卡片样式 */
+        .wish-card {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            font-size: 1em;
+            max-width: 200px;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .wish-card:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .wish-card.expanded {
+            transform: scale(1.3) !important;
+            z-index: 10;
+            background-color: #ffffff;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 主内容容器 */
+        .container {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        #holiday-name {
+            font-weight: 700;
+            font-size: 3em;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        
+        #countdown {
+            font-weight: 700;
+            font-size: 8em;
+            line-height: 1.1;
+            margin: 20px 0;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        
+        .days-label {
+            font-size: 2em;
+            font-weight: 400;
+            color: #e0e0e0;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #d0d0d0;
+            opacity: 0.7;
+        }
+
+        /* 留言输入区 */
+        .wish-input-area {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            width: 90%;
+            max-width: 600px;
+            z-index: 3;
+        }
+
+        #wish-input {
+            flex-grow: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 30px;
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        #wish-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .control-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #submit-wish {
+            background-color: #ff9a9e;
+        }
+        #submit-wish:hover {
+            background-color: #ff7a7e;
+        }
+        
+        #clear-wishes {
+            background-color: #808080;
+        }
+        #clear-wishes:hover {
+            background-color: #505050;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- 愿望墙容器 -->
+    <div class="wish-wall" id="wish-wall"></div>
+
+    <!-- 主内容 -->
+    <div class="container" id="main-container">
+        <h1>距离</h1>
+        <div id="holiday-name">元旦</div>
+        <div id="countdown">43</div>
+        <div class="days-label">天</div>
+        <div class="footer">
+            <p>这次去哪呢 ✨</p>
+        </div>
+    </div>
+
+    <!-- 留言输入区 -->
+    <div class="wish-input-area">
+        <input type="text" id="wish-input" placeholder="输入你的旅行清单...">
+        <button id="submit-wish" class="control-button">提交</button>
+        <button id="clear-wishes" class="control-button">清空</button>
+    </div>
+
+    <script>
+        // --- 倒计时逻辑 ---
+        const countdownElement = document.getElementById('countdown');
+        const holidayNameElement = document.getElementById('holiday-name');
+        let days = 43;
+        
+        document.title = `距离${holidayNameElement.textContent}还有${days}天`;
+        
+        function updateCountdown() {
+            countdownElement.innerText = days;
+            document.title = `距离${holidayNameElement.textContent}还有${days}天`;
+            if (days > 0) {
+                days--;
+                setTimeout(updateCountdown, 24 * 60 * 60 * 1000); 
+            } else {
+                countdownElement.innerText = "假期到啦！";
+                holidayNameElement.innerText = "🎉";
+                document.title = "假期到啦！";
+            }
+        }
+        
+        updateCountdown();
+
+        // --- 旅行愿望墙逻辑 ---
+        const wishWall = document.getElementById('wish-wall');
+        const wishInput = document.getElementById('wish-input');
+        const submitButton = document.getElementById('submit-wish');
+        const clearButton = document.getElementById('clear-wishes');
+        const mainContainer = document.getElementById('main-container');
+        const wishKey = 'travelWishes';
+        const cardMaxWidth = 220; // 卡片最大宽度
+        const cardMaxHeight = 80;  // 卡片估算高度
+
+        // 从本地存储加载愿望
+        function loadWishes() {
+            const savedWishes = localStorage.getItem(wishKey);
+            return savedWishes ? JSON.parse(savedWishes) : [];
+        }
+
+        // 保存愿望到本地存储
+        function saveWish(wishText) {
+            const wishes = loadWishes();
+            wishes.push(wishText);
+            localStorage.setItem(wishKey, JSON.stringify(wishes));
+        }
+        
+        // 清空所有愿望
+        function clearAllWishes() {
+            if (confirm('确定要清空所有愿望吗？此操作不可恢复。')) {
+                localStorage.removeItem(wishKey);
+                displayAllWishes(); // 刷新显示
+            }
+        }
+        
+        // 获取一个不与主容器重叠的随机位置
+        function getSafeRandomPosition() {
+            const containerRect = mainContainer.getBoundingClientRect();
+            const containerLeft = containerRect.left;
+            const containerTop = containerRect.top;
+            const containerRight = containerRect.right;
+            const containerBottom = containerRect.bottom;
+            
+            let isSafe = false;
+            let x, y;
+
+            // 循环直到找到安全的位置
+            while (!isSafe) {
+                // 生成随机位置 (0% 到 100%)
+                x = Math.random() * 100;
+                y = Math.random() * 100;
+                
+                // 将百分比位置转换为视口像素位置进行碰撞检测
+                const cardLeft = (x / 100) * window.innerWidth;
+                const cardTop = (y / 100) * window.innerHeight;
+                const cardRight = cardLeft + cardMaxWidth;
+                const cardBottom = cardTop + cardMaxHeight;
+
+                // 检查卡片是否与主容器重叠
+                const overlaps = !(
+                    cardRight < containerLeft ||
+                    cardLeft > containerRight ||
+                    cardBottom < containerTop ||
+                    cardTop > containerBottom
+                );
+
+                // 如果不重叠，则位置安全
+                isSafe = !overlaps;
+            }
+            
+            return { x, y };
+        }
+
+        // 在页面上显示单个愿望卡片
+        function displayWishCard(wishText, index) {
+            const card = document.createElement('div');
+            card.classList.add('wish-card');
+            card.textContent = wishText;
+            card.dataset.index = index;
+
+            // 获取安全的随机位置
+            const pos = getSafeRandomPosition();
+            card.style.left = `${pos.x}%`;
+            card.style.top = `${pos.y}%`;
+
+            // 随机旋转角度 (-15° 到 15°)
+            const randomRotate = (Math.random() - 0.5) * 30;
+            card.style.transform = `rotate(${randomRotate}deg)`;
+
+            // 点击卡片放大/缩小
+            card.addEventListener('click', () => {
+                card.classList.toggle('expanded');
+                if (card.classList.contains('expanded')) {
+                    card.style.transform = 'scale(1.3)';
+                } else {
+                    card.style.transform = `rotate(${randomRotate}deg)`;
+                }
+            });
+
+            wishWall.appendChild(card);
+        }
+
+        // 显示所有愿望卡片
+        function displayAllWishes() {
+            // 清空现有卡片
+            wishWall.innerHTML = '';
+            const wishes = loadWishes();
+            wishes.forEach((wish, index) => displayWishCard(wish, index));
+        }
+
+        // 提交愿望
+        function handleSubmit() {
+            const wishText = wishInput.value.trim();
+            if (wishText) {
+                saveWish(wishText);
+                displayAllWishes(); // 重新显示所有卡片，以保证布局正确
+                wishInput.value = '';
+            }
+        }
+
+        // 绑定事件
+        submitButton.addEventListener('click', handleSubmit);
+        wishInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSubmit();
+        });
+        clearButton.addEventListener('click', clearAllWishes);
+
+        // 页面加载时显示所有愿望
+        displayAllWishes();
+    </script>
+</body>
+</html>
+    
